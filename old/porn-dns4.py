@@ -1,6 +1,5 @@
 import re
 import unicodedata
-import os
 
 def extract_domain(url):
     """
@@ -25,22 +24,19 @@ def normalize_domain(domain):
     domain = unicodedata.normalize('NFKD', domain)
     return domain.encode('ascii', 'ignore').decode('ascii')
 
+# Read URLs from the provided text file
+with open('urls.txt', 'r') as file:
+    urls = file.readlines()
+
 # Set to store unique domains
 domains = set()
 
-# Iterate over all .txt files in the directory
-for filename in os.listdir():
-    if filename.endswith('.txt'):
-        # Read URLs from each .txt file
-        with open(filename, 'r') as file:
-            urls = file.readlines()
-
-        # Extract and normalize domains from each file
-        for url in urls:
-            domain = extract_domain(url)
-            if domain:
-                domain = normalize_domain(domain)
-                domains.add(domain)
+# Extract and normalize domains from the list of URLs
+for url in urls:
+    domain = extract_domain(url)
+    if domain:
+        domain = normalize_domain(domain)
+        domains.add(domain)
 
 # Open the output script file
 with open('blocklist.rsc', 'w') as script:
