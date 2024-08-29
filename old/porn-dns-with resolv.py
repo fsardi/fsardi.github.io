@@ -1,4 +1,5 @@
 import re
+import socket
 import unicodedata
 import os
 
@@ -25,6 +26,16 @@ def normalize_domain(domain):
     domain = unicodedata.normalize('NFKD', domain)
     return domain.encode('ascii', 'ignore').decode('ascii')
 
+def is_resolvable(domain):
+    """
+    Check if the domain resolves to an IP address.
+    """
+    try:
+        socket.gethostbyname(domain)
+        return True
+    except socket.error:
+        return False
+
 # Set to store unique domains
 domains = set()
 
@@ -42,13 +53,34 @@ for filename in os.listdir():
                 domain = normalize_domain(domain)
                 domains.add(domain)
 
-# Open the output script file
+# Lists to store resolving and non-resolving domains
+resolving_domains = []
+non_resolving_domains = []
+
+# Check which domains resolve and sort them into the appropriate lists
+for domain in domains:
+    if is_resolvable(domain):
+        resolving_domains.append(domain)
+    else:
+        non_resolving_domains.append(domain)
+
+# Write the resolving domains to a text file
+with open('resolving_domains.txt', 'w') as file:
+    for domain in resolving_domains:
+        file.write(domain + '\n')
+
+# Write the non-resolving domains to a separate text file
+with open('non_resolving_domains.txt', 'w') as file:
+    for domain in non_resolving_domains:
+        file.write(domain + '\n')
+
+# Open the output script file for resolvable domains
 with open('blocklist.rsc', 'w') as script:
     
-    # Write DNS static entries for each domain
+    # Write DNS static entries for each resolvable domain
     script.write('/ip dns static\n')
     
-    for domain in domains:
+    for domain in resolving_domains:
         script.write(f'add name={domain} address=10.85.0.8\n')
 
 print("MikroTik DNS script generated successfully.")
