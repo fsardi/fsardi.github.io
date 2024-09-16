@@ -1,4 +1,4 @@
 # fsardi.github.io
 
-Para redirigir a mintic-block.redsi.co
+Para redirigir a https://mintic-block.redsi.co
 
